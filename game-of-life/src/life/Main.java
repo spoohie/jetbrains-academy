@@ -1,5 +1,6 @@
 package life;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
@@ -8,13 +9,13 @@ class Universe {
     String[][] universe;
     static int generation = 0;
 
-    Universe(int size, long seed) {
+    Universe(int size) {
         this.universe = new String[size][size];
-        populateUniverse(seed);
+        populateUniverse();
     }
 
-    void populateUniverse(long seed) {
-        Random random = new Random(seed);
+    void populateUniverse() {
+        Random random = new Random();
         for (int y = 0; y < universe.length; y++) {
             for (int x = 0; x < universe.length; x++) {
                 if (random.nextBoolean()) {
@@ -36,6 +37,13 @@ class Universe {
         String[][] newUniverse = Generator.nextGen(universe);
         universe = newUniverse;
         generation++;
+    }
+
+    public long getNumOfAlive() {
+        return Arrays.stream(universe)
+                .flatMap(Arrays::stream)
+                .filter(c -> c == "O")
+                .count();
     }
 
     public void printUniverse() {
@@ -81,12 +89,23 @@ public class Main {
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
         int size = scan.nextInt();
-        long seed = scan.nextInt();
-        int generations = scan.nextInt();
 
-        Universe universe = new Universe(size, seed);
+        Universe universe = new Universe(size);
 
-        universe.tick(generations);
-        universe.printUniverse();
+        try {
+            while (Universe.generation < 11) {
+                if (System.getProperty("os.name").contains("Windows"))
+                    new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+                else
+                    Runtime.getRuntime().exec("clear");
+
+                universe.tick();
+                System.out.println("Generation #" + Universe.generation);
+                System.out.println("Alive: " + universe.getNumOfAlive());
+                universe.printUniverse();
+                Thread.sleep(1000);
+            }
+        } catch (InterruptedException | IOException e) {}
+
     }
 }
