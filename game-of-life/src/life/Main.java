@@ -6,6 +6,7 @@ import java.util.Scanner;
 
 class Universe {
     String[][] universe;
+    static int generation = 0;
 
     Universe(int size, long seed) {
         this.universe = new String[size][size];
@@ -25,9 +26,16 @@ class Universe {
         }
     }
 
+    public void tick(int numOfTicks) {
+        for (int i = 0; i < numOfTicks; i++ ) {
+            tick();
+        }
+    }
+
     public void tick() {
         String[][] newUniverse = Generator.nextGen(universe);
         universe = newUniverse;
+        generation++;
     }
 
     public void printUniverse() {
@@ -78,9 +86,7 @@ public class Main {
 
         Universe universe = new Universe(size, seed);
 
-        for (int i = 0; i < generations; i++) {
-            universe.tick();
-        }
+        universe.tick(generations);
         universe.printUniverse();
     }
 }
